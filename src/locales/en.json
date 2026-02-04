@@ -1,0 +1,112 @@
+{
+  "common": {
+    "prayerApp": "Prayer App",
+    "loading": "Loading...",
+    "error": "Error",
+    "back": "Back",
+    "next": "Next",
+    "now": "Now",
+    "current": "Current",
+    "upcoming": "UPCOMING",
+    "set": "Set"
+  },
+
+  "nav": {
+    "prayerTimes": "Prayer Times",
+    "qibla": "Qibla",
+    "quran": "Quran",
+    "settings": "Settings"
+  },
+
+  "home": {
+    "title": "Prayer Times in {{city}}",
+    "selectCity": "Select a city above to see prayer times",
+    "prayerTime": "Prayer time: {{time}}"
+  },
+
+  "prayers": {
+    "fajr": "Fajr",
+    "sunrise": "Sunrise",
+    "dhuhr": "Dhuhr",
+    "asr": "Asr",
+    "maghrib": "Maghrib",
+    "isha": "Isha",
+    "loadingTimes": "Loading prayer times",
+    "unableToLoad": "Unable to load prayer times"
+  },
+
+  "city": {
+    "selectYourCity": "Select Your City",
+    "popularCities": "Popular cities",
+    "cityPlaceholder": "City",
+    "countryPlaceholder": "Country"
+  },
+
+  "qibla": {
+    "title": "Qibla Direction",
+    "subtitle": "Find the direction of the Holy Kaaba",
+    "direction": "Qibla Direction: {{degrees}}",
+    "distance": "Distance to Mecca: {{km}} km",
+    "enableCompass": "Enable Compass",
+    "permissionDenied": "Compass permission denied. Please enable it in your device settings.",
+    "unsupported": "Your device does not support the compass feature. The direction shown is based on your location.",
+    "howToUse": "How to use",
+    "instruction1": "Hold your device flat and level",
+    "instruction2": "The green arrow points towards the Qibla",
+    "instruction3": "Rotate your body to face the arrow direction",
+    "instruction4": "For best accuracy, calibrate your compass by moving your phone in a figure-8 pattern"
+  },
+
+  "quran": {
+    "title": "Holy Quran",
+    "subtitle": "Read and explore the Noble Quran",
+    "searchPlaceholder": "Search surah name, translation, or number...",
+    "tabSurah": "Surah",
+    "tabJuz": "Juz",
+    "tabRevelation": "Revelation",
+    "sortAsc": "ASC",
+    "sortDesc": "DESC",
+    "meccan": "Meccan",
+    "medinan": "Medinan",
+    "ayahs": "Ayahs",
+    "verses": "verses",
+    "noResults": "No surahs found for \"{{query}}\"",
+    "verseOfDay": "Verse of the Day",
+    "readFullSurah": "Read full surah",
+    "unableToLoadVerse": "Unable to load verse. Please try again later.",
+    "ayah": "Ayah {{number}}",
+    "viewVerse": "Verse by Verse",
+    "viewArabic": "Complete",
+    "viewTranslation": "Translation",
+    "bismillahTranslation": "In the name of Allah, the Most Gracious, the Most Merciful",
+    "versesRange": "Verses {{start}}\u2013{{end}}",
+    "backToQuran": "Back to Quran"
+  },
+
+  "settings": {
+    "title": "Settings",
+    "calculationMethod": "Calculation Method",
+    "asrCalculation": "Asr Calculation",
+    "shafiStandard": "Shafi / Standard",
+    "shafiDesc": "Shadow = object length",
+    "hanafi": "Hanafi",
+    "hanafiDesc": "Shadow = 2x object length",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "language": "Language",
+    "about": "About",
+    "aboutText": "Prayer Times App provides accurate prayer times, Qibla direction, and Quran reading for Muslims worldwide.",
+    "version": "Version {{version}}",
+    "prayerTimesApi": "Prayer times: AlAdhan API",
+    "quranApi": "Quran: Al Quran Cloud API"
+  },
+
+  "compass": {
+    "north": "N",
+    "east": "E",
+    "south": "S",
+    "west": "W"
+  }
+}
