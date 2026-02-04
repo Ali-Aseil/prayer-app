@@ -12,6 +12,7 @@ import { useTranslation } from "@/contexts/language-context"
 
 export default function QuranPage() {
   const [searchQuery, setSearchQuery] = useState("")
+  const handleSearchChange = (value: string) => setSearchQuery(value.slice(0, 50))
   const [sortAsc, setSortAsc] = useState(true)
   const [activeTab, setActiveTab] = useState("surah")
   const { t } = useTranslation()
@@ -74,7 +75,8 @@ export default function QuranPage() {
             type="text"
             placeholder={t("quran.searchPlaceholder")}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            maxLength={50}
             className="pl-10"
           />
         </div>

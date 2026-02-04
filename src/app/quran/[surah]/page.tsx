@@ -37,7 +37,8 @@ function getStoredViewMode(): ViewMode {
 
 export default function SurahPage() {
   const params = useParams()
-  const surahNumber = params.surah as string
+  const rawSurah = params.surah as string
+  const surahNumber = /^\d+$/.test(rawSurah) ? Math.min(Math.max(Number(rawSurah), 1), 114).toString() : "1"
   const { t, language } = useTranslation()
 
   const [surahData, setSurahData] = useState<SurahData | null>(null)

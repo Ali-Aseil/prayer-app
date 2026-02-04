@@ -143,7 +143,7 @@ export function VerseOfDay() {
         </div>
 
         <Link
-          href={`/quran/${verse.surahNumber}`}
+          href={`/quran/${Math.min(Math.max(verse.surahNumber, 1), 114)}`}
           className="text-center text-sm font-medium text-primary hover:underline"
         >
           {t("quran.readFullSurah")}

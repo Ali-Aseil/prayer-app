@@ -78,13 +78,15 @@ export function CitySelector({ currentCity, onSelect }: CitySelectorProps) {
         <Input
           placeholder={t("city.cityPlaceholder")}
           value={city}
-          onChange={(e) => setCity(e.target.value)}
+          onChange={(e) => setCity(e.target.value.slice(0, 100))}
+          maxLength={100}
           className="flex-1"
         />
         <Input
           placeholder={t("city.countryPlaceholder")}
           value={country}
-          onChange={(e) => setCountry(e.target.value)}
+          onChange={(e) => setCountry(e.target.value.slice(0, 100))}
+          maxLength={100}
           className="flex-1"
         />
         <Button type="submit" size="sm" disabled={!city.trim() || !country.trim()}>
