@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { SURAHS } from "@/data/surahs"
 import { useTranslation } from "@/contexts/language-context"
 
@@ -82,9 +81,6 @@ export default function SurahPage() {
         const verses: Verse[] = arabicData.data.ayahs.map(
           (ayah: { numberInSurah: number; text: string }, index: number) => {
             let text = ayah.text
-            // Strip Bismillah from verse 1 for surahs other than 1 (Al-Fatiha) and 9 (At-Tawba)
-            // The API includes Bismillah as part of verse 1 text, but we display it separately
-            // Use NFC normalization to handle diacritics ordering differences
             if (ayah.numberInSurah === 1 && surahNum !== 1 && surahNum !== 9) {
               const bismillah = "بِسۡمِ ٱللَّهِ ٱلرَّحۡمَـٰنِ ٱلرَّحِیمِ".normalize("NFC")
               text = text.normalize("NFC").replace(bismillah, "").trim()
@@ -119,54 +115,44 @@ export default function SurahPage() {
   const revelationLabel = surahInfo?.revelationType === "Meccan" ? t("quran.meccan") : t("quran.medinan")
 
   return (
-    <div className="min-h-screen">
+    <div className="quran-page min-h-screen">
       {/* Sticky Header */}
-      <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="quran-header sticky top-0 z-40">
         <div className="mx-auto flex h-14 max-w-2xl items-center gap-3 px-4">
           <Link href="/quran">
-            <Button variant="ghost" size="icon" aria-label={t("quran.backToQuran")}>
+            <Button variant="ghost" size="icon" aria-label={t("quran.backToQuran")} className="text-inherit hover:bg-white/10">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
-          <div className="flex-1 min-w-0">
-            <h1 className="font-semibold truncate">
-              {surahInfo?.englishName || surahData?.englishName || t("common.loading")}
+          <div className="flex-1 min-w-0 text-center">
+            <h1 className="font-semibold truncate text-base" dir="rtl" lang="ar">
+              {surahInfo?.name || surahData?.name}
             </h1>
-            <p className="text-xs text-muted-foreground truncate">
-              {surahInfo
-                ? `${surahInfo.englishNameTranslation} - ${surahInfo.numberOfAyahs} ${t("quran.ayahs")}`
-                : ""}
+            <p className="text-xs opacity-80 truncate">
+              {surahInfo?.englishName || surahData?.englishName}
             </p>
           </div>
-          <span className="text-xl shrink-0" dir="rtl" lang="ar">
-            {surahInfo?.name || surahData?.name}
-          </span>
+          <div className="w-10" /> {/* Spacer for centering */}
         </div>
       </header>
 
       <div className="mx-auto max-w-2xl px-4 py-6">
-        {/* Surah Title Card */}
+        {/* Surah Banner */}
         {(surahInfo || surahData) && (
-          <div className="mb-6 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-accent/5 p-6 text-center">
-            <div className="mb-2 inline-flex h-12 w-12 items-center justify-center rounded-full border-2 border-primary/30 text-lg font-bold text-primary">
-              {surahInfo?.number || surahData?.number}
-            </div>
-            <h2 className="quran-arabic-large mb-1" dir="rtl" lang="ar">
+          <div className="quran-surah-banner mb-6">
+            <h2 className="text-2xl font-bold mb-1" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>
               {surahInfo?.name || surahData?.name}
             </h2>
-            <p className="text-sm font-medium">
-              {surahInfo?.englishName || surahData?.englishName}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {surahInfo?.englishNameTranslation || surahData?.englishNameTranslation}
+            <p className="text-sm opacity-90">
+              {surahInfo?.englishName || surahData?.englishName} - {surahInfo?.englishNameTranslation || surahData?.englishNameTranslation}
             </p>
             <div className="mt-2 flex items-center justify-center gap-2">
-              <Badge variant="secondary" className="text-xs">
+              <span className="inline-block rounded-full bg-white/15 px-3 py-0.5 text-xs">
                 {revelationLabel}
-              </Badge>
-              <Badge variant="outline" className="text-xs">
+              </span>
+              <span className="inline-block rounded-full bg-white/15 px-3 py-0.5 text-xs">
                 {surahInfo?.numberOfAyahs || surahData?.numberOfAyahs} {t("quran.ayahs")}
-              </Badge>
+              </span>
             </div>
           </div>
         )}
@@ -190,9 +176,9 @@ export default function SurahPage() {
         {/* Loading State */}
         {isLoading && (
           <div className="space-y-6">
-            <div className="rounded-xl bg-primary/5 p-6 text-center">
-              <Skeleton className="mx-auto mb-3 h-10 w-3/4" />
-              <Skeleton className="mx-auto h-4 w-1/2" />
+            <div className="quran-surah-banner p-6 text-center">
+              <Skeleton className="mx-auto mb-3 h-10 w-3/4 bg-white/20" />
+              <Skeleton className="mx-auto h-4 w-1/2 bg-white/20" />
             </div>
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="space-y-2">
@@ -215,19 +201,17 @@ export default function SurahPage() {
           <div className="pb-24">
             {/* Bismillah */}
             {surahData.number !== 9 && (
-              <>
-                <div className="mb-2 text-center">
-                  <p className="quran-arabic-large" dir="rtl" lang="ar">
-                    بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
-                  </p>
-                </div>
-                <Separator className="my-6" />
-              </>
+              <div className="mb-6">
+                <p className="quran-bismillah" dir="rtl" lang="ar">
+                  بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+                </p>
+                <div className="border-b border-[var(--quran-border,hsl(var(--border)))]" />
+              </div>
             )}
 
             {/* Arabic Only Mode */}
             {viewMode === "arabic" && (
-              <div className="quran-arabic-large text-center" dir="rtl" lang="ar">
+              <div className="quran-arabic-large leading-[3.5]" dir="rtl" lang="ar">
                 {surahData.verses.map((verse) => (
                   <span key={verse.number}>
                     {verse.text}{" "}
@@ -239,14 +223,14 @@ export default function SurahPage() {
 
             {/* Verse by Verse Mode */}
             {viewMode === "verse" && (
-              <div className="space-y-8">
+              <div className="space-y-6">
                 {surahData.verses.map((verse) => (
                   <div key={verse.number}>
-                    <p className="quran-arabic-large text-center" dir="rtl" lang="ar">
+                    <p className="quran-arabic-large" dir="rtl" lang="ar">
                       {verse.text}{" "}
                       <span className="verse-badge">{verse.number}</span>
                     </p>
-                    <Separator className="mt-6" />
+                    <div className="mt-4 border-b border-[var(--quran-border,hsl(var(--border)))]" />
                   </div>
                 ))}
               </div>

@@ -223,21 +223,59 @@ body {
   transform-origin: center center;
 }
 
+/* Quran Page Theme */
+.quran-page {
+  --quran-bg: #f5f0e1;
+  --quran-header-bg: #2d4a3e;
+  --quran-header-text: #f5f0e1;
+  --quran-text: #1a1a1a;
+  --quran-border: #d4c9a8;
+}
+
+.dark .quran-page {
+  --quran-bg: #2a2520;
+  --quran-header-bg: #1a3029;
+  --quran-header-text: #d4c9a8;
+  --quran-text: #e8e0d0;
+  --quran-border: #4a4035;
+}
+
+.quran-page {
+  background-color: var(--quran-bg);
+  min-height: 100vh;
+}
+
+.quran-header {
+  background-color: var(--quran-header-bg) !important;
+  color: var(--quran-header-text);
+  border-bottom: 1px solid var(--quran-border);
+}
+
+.quran-header h1,
+.quran-header p,
+.quran-header span,
+.quran-header a,
+.quran-header button {
+  color: var(--quran-header-text);
+}
+
 /* Quran Text Styling */
 .quran-arabic {
   font-family: var(--font-arabic);
   font-size: 1.75rem;
   line-height: 2.5;
-  text-align: center;
+  text-align: right;
   direction: rtl;
+  color: var(--quran-text, hsl(var(--foreground)));
 }
 
 .quran-arabic-large {
   font-family: var(--font-arabic);
   font-size: 2rem;
   line-height: 3;
-  text-align: center;
+  text-align: right;
   direction: rtl;
+  color: var(--quran-text, hsl(var(--foreground)));
 }
 
 .quran-translation {
@@ -252,17 +290,50 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  border: 1.5px solid hsl(var(--primary));
-  color: hsl(var(--primary));
-  font-size: 0.7rem;
-  font-weight: 600;
+  border: 2px solid #2d6a4f;
+  background-color: rgba(45, 106, 79, 0.08);
+  color: #2d6a4f;
+  font-size: 0.75rem;
+  font-weight: 700;
   font-family: var(--font-sans);
-  margin: 0 0.25rem;
+  margin: 0 0.3rem;
   vertical-align: middle;
   direction: ltr;
+}
+
+.dark .verse-badge {
+  border-color: #52b788;
+  color: #52b788;
+  background-color: rgba(82, 183, 136, 0.1);
+}
+
+/* Bismillah styling */
+.quran-bismillah {
+  font-family: var(--font-arabic);
+  font-size: 1.8rem;
+  line-height: 2.5;
+  text-align: center;
+  direction: rtl;
+  color: var(--quran-text, hsl(var(--foreground)));
+  padding: 1rem 0;
+}
+
+/* Surah title banner */
+.quran-surah-banner {
+  background: linear-gradient(135deg, #2d4a3e 0%, #3d6b5e 100%);
+  color: #f5f0e1;
+  border-radius: 0.75rem;
+  padding: 1rem 1.5rem;
+  text-align: center;
+  border: 2px solid #4a7a6a;
+}
+
+.dark .quran-surah-banner {
+  background: linear-gradient(135deg, #1a3029 0%, #2d4a3e 100%);
+  border-color: #3d6b5e;
 }
 
 /* Countdown Timer Animations */
