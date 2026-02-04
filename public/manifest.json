@@ -1,6 +1,6 @@
 {
-  "name": "Prayer Times - Islamic Prayer App",
-  "short_name": "Prayer Times",
+  "name": "Muslim Salah App",
+  "short_name": "Muslim Salah",
   "description": "Accurate prayer times, Qibla direction, and Quran reader for Muslims worldwide.",
   "start_url": "/",
   "display": "standalone",

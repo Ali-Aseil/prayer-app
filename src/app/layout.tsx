@@ -16,25 +16,25 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Prayer Times - Islamic Prayer App",
-    template: "%s | Prayer Times",
+    default: "Muslim Salah App",
+    template: "%s | Muslim Salah",
   },
   description: "Accurate prayer times, Qibla direction, and Quran reader for Muslims worldwide.",
   keywords: ["prayer times", "salah", "namaz", "qibla", "quran", "islamic app", "muslim"],
-  authors: [{ name: "Prayer App" }],
-  creator: "Prayer App",
-  metadataBase: new URL("https://prayer-app.vercel.app"),
+  authors: [{ name: "Muslim Salah" }],
+  creator: "Muslim Salah",
+  metadataBase: new URL("https://muslimsalah.vercel.app"),
   openGraph: {
     type: "website",
     locale: "en_US",
     alternateLocale: "ar_SA",
-    title: "Prayer Times - Islamic Prayer App",
+    title: "Muslim Salah App",
     description: "Accurate prayer times, Qibla direction, and Quran reader for Muslims worldwide.",
-    siteName: "Prayer Times",
+    siteName: "Muslim Salah",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Prayer Times - Islamic Prayer App",
+    title: "Muslim Salah App",
     description: "Accurate prayer times, Qibla direction, and Quran reader for Muslims worldwide.",
   },
   manifest: "/manifest.json",
