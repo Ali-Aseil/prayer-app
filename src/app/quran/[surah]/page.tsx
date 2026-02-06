@@ -1,17 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useParams } from "next/navigation"
+import { useState, useEffect, useMemo, Fragment, useRef, useCallback } from "react"
+import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, BookOpen, AlignJustify } from "lucide-react"
+import { ArrowRight, Bookmark, Search, Play, Pause, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
 import { SURAHS } from "@/data/surahs"
 import { useTranslation } from "@/contexts/language-context"
-
-type ViewMode = "verse" | "arabic" | "translation"
 
 interface Verse {
   number: number
@@ -29,33 +25,114 @@ interface SurahData {
   verses: Verse[]
 }
 
-function getStoredViewMode(): ViewMode {
-  if (typeof window === "undefined") return "verse"
-  return (localStorage.getItem("quran-view-mode") as ViewMode) || "verse"
+// Words that should be highlighted in pink (Allah's names)
+const ALLAH_WORDS = [
+  // Allah
+  "ٱللَّهِ", "ٱللَّهَ", "ٱللَّهُ", "اللَّهِ", "اللَّهَ", "اللَّهُ", "الله", "لِلَّهِ", "بِاللَّهِ", "بِٱللَّهِ",
+  "للَّهِ", "وَٱللَّهُ", "وَاللَّهُ", "فَٱللَّهُ", "خَتَمَ",
+  // Names of Allah
+  "ٱلرَّحْمَـٰنِ", "ٱلرَّحِيمِ", "الرَّحْمَنِ", "الرَّحِيمِ", "الرحمن", "الرحيم",
+  // Rabb
+  "رَبِّ", "رَبَّ", "رَبُّ", "رَبِّهِ", "رَبِّهِم", "رَبَّنَا", "رَبُّكَ", "رَبُّكُم", "رَّبِّهِمْ"
+]
+
+// Words that should be highlighted in green (special pious/religious terms)
+const SPECIAL_WORDS = [
+  // Positive religious terms
+  "يُنفِقُونَ", "يُؤْمِنُونَ", "ٱلصَّلَوٰةَ", "ٱلْمُفْلِحُونَ", "هُدًى", "ٱلْمُتَّقِينَ", "لِّلْمُتَّقِينَ",
+  "يُوقِنُونَ", "مُهْتَدِينَ", "مُصْلِحُونَ", "ءَامَنُوا۟", "ءَامِنُوا۟",
+  // Negative/Warning terms (also highlighted in green in traditional Qurans)
+  "مُّسْتَهْزِءُونَ", "غِشَـٰوَةٌ", "ٱلسُّفَهَآءُ", "يَعْمَهُونَ", "ٱلضَّلَـٰلَةَ",
+  "مُفْسِدُونَ", "خَسِرَتْ", "يَخْدَعُونَ", "مَّرَضٌ", "يُخَـٰدِعُونَ", "مَرَضًا",
+  "يَكْذِبُونَ", "لَا يَشْعُرُونَ", "لَا يَعْلَمُونَ", "لَا يُفْسِدُوا۟", "كَـٰفِرِينَ"
+]
+
+function highlightWord(word: string): { text: string; type: "normal" | "allah" | "special" } {
+  // Check if word contains Allah's names
+  for (const allahWord of ALLAH_WORDS) {
+    if (word.includes(allahWord)) {
+      return { text: word, type: "allah" }
+    }
+  }
+  // Check if word is a special term
+  for (const specialWord of SPECIAL_WORDS) {
+    if (word.includes(specialWord)) {
+      return { text: word, type: "special" }
+    }
+  }
+  return { text: word, type: "normal" }
+}
+
+function convertToArabicNumeral(num: number): string {
+  const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩']
+  return num.toString().split('').map(d => arabicNumerals[parseInt(d)]).join('')
 }
 
 export default function SurahPage() {
   const params = useParams()
+  const router = useRouter()
   const rawSurah = params.surah as string
-  const surahNumber = /^\d+$/.test(rawSurah) ? Math.min(Math.max(Number(rawSurah), 1), 114).toString() : "1"
-  const { t, language } = useTranslation()
+  const surahNumber = /^\d+$/.test(rawSurah) ? Math.min(Math.max(Number(rawSurah), 1), 114) : 1
+  const { t } = useTranslation()
 
   const [surahData, setSurahData] = useState<SurahData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<ViewMode>("verse")
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
 
-  const surahInfo = SURAHS.find((s) => s.number === Number(surahNumber))
+  const surahInfo = SURAHS.find((s) => s.number === surahNumber)
 
-  useEffect(() => {
-    setViewMode(getStoredViewMode())
+  // Calculate total pages (roughly 15 verses per page)
+  const versesPerPage = 15
+  const totalPages = surahData ? Math.ceil(surahData.verses.length / versesPerPage) : 1
+
+  // Touch gesture handling for swipe navigation
+  const touchStartX = useRef(0)
+  const touchEndX = useRef(0)
+  const minSwipeDistance = 50
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.targetTouches[0].clientX
   }, [])
 
-  const handleViewModeChange = (mode: string) => {
-    const m = mode as ViewMode
-    setViewMode(m)
-    localStorage.setItem("quran-view-mode", m)
-  }
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX
+  }, [])
+
+  const handleTouchEnd = useCallback(() => {
+    const distance = touchStartX.current - touchEndX.current
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+
+    if (isLeftSwipe) {
+      // Swipe left = next page (RTL: previous content)
+      if (currentPage < totalPages) {
+        setCurrentPage(p => p + 1)
+        window.scrollTo(0, 0)
+      } else if (surahNumber < 114) {
+        router.push(`/quran/${surahNumber + 1}`)
+      }
+    }
+
+    if (isRightSwipe) {
+      // Swipe right = previous page (RTL: next content)
+      if (currentPage > 1) {
+        setCurrentPage(p => p - 1)
+        window.scrollTo(0, 0)
+      } else if (surahNumber > 1) {
+        router.push(`/quran/${surahNumber - 1}`)
+      }
+    }
+  }, [currentPage, totalPages, surahNumber, router])
+
+  // Get current page verses
+  const currentVerses = useMemo(() => {
+    if (!surahData) return []
+    const start = (currentPage - 1) * versesPerPage
+    const end = start + versesPerPage
+    return surahData.verses.slice(start, end)
+  }, [surahData, currentPage, versesPerPage])
 
   useEffect(() => {
     const fetchSurah = async () => {
@@ -81,6 +158,7 @@ export default function SurahPage() {
         const verses: Verse[] = arabicData.data.ayahs.map(
           (ayah: { numberInSurah: number; text: string }, index: number) => {
             let text = ayah.text
+            // Remove Bismillah from first verse (except Al-Fatiha and At-Tawba)
             if (ayah.numberInSurah === 1 && surahNum !== 1 && surahNum !== 9) {
               const bismillah = "بِسۡمِ ٱللَّهِ ٱلرَّحۡمَـٰنِ ٱلرَّحِیمِ".normalize("NFC")
               text = text.normalize("NFC").replace(bismillah, "").trim()
@@ -112,132 +190,220 @@ export default function SurahPage() {
     fetchSurah()
   }, [surahNumber])
 
-  const revelationLabel = surahInfo?.revelationType === "Meccan" ? t("quran.meccan") : t("quran.medinan")
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(p => p + 1)
+      window.scrollTo(0, 0)
+    }
+  }
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(p => p - 1)
+      window.scrollTo(0, 0)
+    }
+  }
+
+  const goToNextSurah = () => {
+    if (surahNumber < 114) {
+      router.push(`/quran/${surahNumber + 1}`)
+    }
+  }
+
+  const goToPrevSurah = () => {
+    if (surahNumber > 1) {
+      router.push(`/quran/${surahNumber - 1}`)
+    }
+  }
+
+  // Render verse text with highlighted words
+  const renderVerseText = (text: string) => {
+    const words = text.split(/(\s+)/)
+    return words.map((word, idx) => {
+      if (/^\s+$/.test(word)) return word
+      const highlighted = highlightWord(word)
+      if (highlighted.type === "allah") {
+        return <span key={idx} className="quran-word-allah">{word}</span>
+      }
+      if (highlighted.type === "special") {
+        return <span key={idx} className="quran-word-special">{word}</span>
+      }
+      return word
+    })
+  }
+
+  const surahNameDisplay = surahInfo?.name || surahData?.name || ""
+  const juzNumber = 1 // Simplified - would need proper juz calculation
 
   return (
-    <div className="quran-page min-h-screen">
-      {/* Sticky Header */}
+    <div className="quran-page min-h-screen flex flex-col">
+      {/* Header */}
       <header className="quran-header sticky top-0 z-40">
-        <div className="mx-auto flex h-14 max-w-2xl items-center gap-3 px-4">
+        <div className="flex h-14 items-center justify-between px-4">
+          {/* Left side - Bookmark & Search */}
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" className="text-inherit hover:bg-white/10">
+              <Bookmark className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="text-inherit hover:bg-white/10">
+              <Search className="h-5 w-5" />
+            </Button>
+          </div>
+
+          {/* Center - Surah Name */}
+          <div className="flex-1 text-center">
+            <h1 className="font-semibold text-base" dir="rtl" lang="ar">
+              {surahNameDisplay}، الجزء {convertToArabicNumeral(juzNumber)}
+            </h1>
+          </div>
+
+          {/* Right side - Back Arrow */}
           <Link href="/quran">
-            <Button variant="ghost" size="icon" aria-label={t("quran.backToQuran")} className="text-inherit hover:bg-white/10">
-              <ArrowLeft className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="text-inherit hover:bg-white/10">
+              <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>
-          <div className="flex-1 min-w-0 text-center">
-            <h1 className="font-semibold truncate text-base" dir="rtl" lang="ar">
-              {surahInfo?.name || surahData?.name}
-            </h1>
-            <p className="text-xs opacity-80 truncate">
-              {surahInfo?.englishName || surahData?.englishName}
-            </p>
-          </div>
-          <div className="w-10" /> {/* Spacer for centering */}
         </div>
       </header>
 
-      <div className="mx-auto max-w-2xl px-4 py-6">
-        {/* Surah Banner */}
-        {(surahInfo || surahData) && (
-          <div className="quran-surah-banner mb-6">
-            <h2 className="text-2xl font-bold mb-1" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>
-              {surahInfo?.name || surahData?.name}
-            </h2>
-            <p className="text-sm opacity-90">
-              {surahInfo?.englishName || surahData?.englishName} - {surahInfo?.englishNameTranslation || surahData?.englishNameTranslation}
-            </p>
-            <div className="mt-2 flex items-center justify-center gap-2">
-              <span className="inline-block rounded-full bg-white/15 px-3 py-0.5 text-xs">
-                {revelationLabel}
-              </span>
-              <span className="inline-block rounded-full bg-white/15 px-3 py-0.5 text-xs">
-                {surahInfo?.numberOfAyahs || surahData?.numberOfAyahs} {t("quran.ayahs")}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* View Mode Tabs */}
-        <div className="mb-6 flex justify-center">
-          <Tabs value={viewMode} onValueChange={handleViewModeChange}>
-            <TabsList>
-              <TabsTrigger value="verse" className="gap-1.5">
-                <AlignJustify className="h-3.5 w-3.5" />
-                {t("quran.viewVerse")}
-              </TabsTrigger>
-              <TabsTrigger value="arabic" className="gap-1.5">
-                <BookOpen className="h-3.5 w-3.5" />
-                {t("quran.viewArabic")}
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-
+      {/* Main Content */}
+      <main
+        className="flex-1 quran-content pb-20"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         {/* Loading State */}
         {isLoading && (
-          <div className="space-y-6">
-            <div className="quran-surah-banner p-6 text-center">
-              <Skeleton className="mx-auto mb-3 h-10 w-3/4 bg-white/20" />
-              <Skeleton className="mx-auto h-4 w-1/2 bg-white/20" />
+          <div className="space-y-6 p-4">
+            <Skeleton className="h-24 w-full bg-[var(--quran-teal)]/20" />
+            <div className="space-y-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full bg-[var(--quran-border)]" />
+              ))}
             </div>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="space-y-2">
-                <Skeleton className="mx-auto h-8 w-full" />
-                <Skeleton className="mx-auto h-4 w-3/4" />
-              </div>
-            ))}
           </div>
         )}
 
         {/* Error State */}
         {error && (
-          <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-center text-destructive">
+          <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-center text-destructive m-4">
             {error}
           </div>
         )}
 
         {/* Surah Content */}
         {surahData && !isLoading && (
-          <div className="pb-24">
-            {/* Bismillah */}
-            {surahData.number !== 9 && (
-              <div className="mb-6">
-                <p className="quran-bismillah" dir="rtl" lang="ar">
-                  بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
-                </p>
-                <div className="border-b border-[var(--quran-border,hsl(var(--border)))]" />
-              </div>
-            )}
+          <>
+            {/* Ornate Surah Banner - Only on first page */}
+            {currentPage === 1 && (
+              <div className="quran-surah-banner mb-4">
+                <div className="quran-surah-banner-inner">
+                  <div className="quran-surah-banner-corner top-left" />
+                  <div className="quran-surah-banner-corner top-right" />
+                  <div className="quran-surah-banner-corner bottom-left" />
+                  <div className="quran-surah-banner-corner bottom-right" />
 
-            {/* Arabic Only Mode */}
-            {viewMode === "arabic" && (
-              <div className="quran-arabic-large leading-[3.5]" dir="rtl" lang="ar">
-                {surahData.verses.map((verse) => (
-                  <span key={verse.number}>
-                    {verse.text}{" "}
-                    <span className="verse-badge">{verse.number}</span>{" "}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Verse by Verse Mode */}
-            {viewMode === "verse" && (
-              <div className="space-y-6">
-                {surahData.verses.map((verse) => (
-                  <div key={verse.number}>
-                    <p className="quran-arabic-large" dir="rtl" lang="ar">
-                      {verse.text}{" "}
-                      <span className="verse-badge">{verse.number}</span>
-                    </p>
-                    <div className="mt-4 border-b border-[var(--quran-border,hsl(var(--border)))]" />
+                  <div className="quran-surah-banner-info">
+                    <span>آياتها {convertToArabicNumeral(surahData.numberOfAyahs)}</span>
+                    <span>{surahData.revelationType === "Meccan" ? "مكية" : "مدنية"}</span>
                   </div>
-                ))}
+
+                  <h2 className="quran-surah-banner-title" dir="rtl" lang="ar">
+                    {surahData.name.replace(/سُورَةُ\s*/, "")}
+                  </h2>
+
+                  <div className="quran-surah-banner-info">
+                    <span>{surahData.englishName}</span>
+                    <span>{surahData.englishNameTranslation}</span>
+                  </div>
+                </div>
               </div>
             )}
-          </div>
+
+            {/* Bismillah - Only on first page and not for At-Tawba */}
+            {currentPage === 1 && surahData.number !== 9 && (
+              <p className="quran-bismillah" dir="rtl" lang="ar">
+                بِسْمِ <span className="allah-name">اللَّهِ</span> <span className="rahman-name">الرَّحْمَٰنِ</span> <span className="rahman-name">الرَّحِيمِ</span>
+              </p>
+            )}
+
+            {/* Arabic Text - Continuous Flow */}
+            <div className="quran-arabic-flow" dir="rtl" lang="ar">
+              {currentVerses.map((verse) => (
+                <Fragment key={verse.number}>
+                  {renderVerseText(verse.text)}{" "}
+                  <span className="verse-badge">
+                    <span>{convertToArabicNumeral(verse.number)}</span>
+                  </span>{" "}
+                </Fragment>
+              ))}
+            </div>
+
+            {/* Navigation Hints */}
+            <div className="flex justify-between items-center px-4 py-6 text-sm opacity-60">
+              {currentPage > 1 ? (
+                <button onClick={goToPrevPage} className="flex items-center gap-1">
+                  <ChevronLeft className="h-4 w-4" />
+                  الصفحة السابقة
+                </button>
+              ) : surahNumber > 1 ? (
+                <button onClick={goToPrevSurah} className="flex items-center gap-1">
+                  <ChevronLeft className="h-4 w-4" />
+                  السورة السابقة
+                </button>
+              ) : (
+                <span />
+              )}
+
+              {currentPage < totalPages ? (
+                <button onClick={goToNextPage} className="flex items-center gap-1">
+                  الصفحة التالية
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              ) : surahNumber < 114 ? (
+                <button onClick={goToNextSurah} className="flex items-center gap-1">
+                  السورة التالية
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              ) : (
+                <span />
+              )}
+            </div>
+          </>
         )}
-      </div>
+      </main>
+
+      {/* Bottom Audio Bar */}
+      {surahData && !isLoading && (
+        <div className="quran-audio-bar">
+          {/* Play Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white hover:bg-white/10"
+            onClick={() => setIsPlaying(!isPlaying)}
+          >
+            {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 fill-current" />}
+          </Button>
+
+          {/* Page Dots */}
+          <div className="quran-page-dots">
+            {Array.from({ length: Math.min(totalPages, 30) }).map((_, i) => (
+              <button
+                key={i}
+                className={`quran-page-dot ${i + 1 === currentPage ? 'active' : ''}`}
+                onClick={() => setCurrentPage(i + 1)}
+              />
+            ))}
+          </div>
+
+          {/* Page Number */}
+          <div className="quran-page-number">
+            {convertToArabicNumeral(currentPage)}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

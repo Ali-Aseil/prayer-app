@@ -223,21 +223,33 @@ body {
   transform-origin: center center;
 }
 
-/* Quran Page Theme */
+/* Quran Page Theme - Traditional Islamic Style */
 .quran-page {
   --quran-bg: #f5f0e1;
-  --quran-header-bg: #2d4a3e;
-  --quran-header-text: #f5f0e1;
+  --quran-header-bg: #1a4d4d;
+  --quran-header-text: #ffffff;
   --quran-text: #1a1a1a;
   --quran-border: #d4c9a8;
+  --quran-teal: #1a6b6b;
+  --quran-teal-light: #2d8a8a;
+  --quran-gold: #c4a45c;
+  --quran-pink: #d63384;
+  --quran-green: #198754;
+  --quran-verse-bg: rgba(26, 107, 107, 0.08);
 }
 
 .dark .quran-page {
   --quran-bg: #2a2520;
-  --quran-header-bg: #1a3029;
+  --quran-header-bg: #0d2626;
   --quran-header-text: #d4c9a8;
   --quran-text: #e8e0d0;
   --quran-border: #4a4035;
+  --quran-teal: #2d8a8a;
+  --quran-teal-light: #3da5a5;
+  --quran-gold: #d4b46a;
+  --quran-pink: #e685b5;
+  --quran-green: #52b788;
+  --quran-verse-bg: rgba(45, 138, 138, 0.1);
 }
 
 .quran-page {
@@ -245,21 +257,275 @@ body {
   min-height: 100vh;
 }
 
+/* Quran Header - Teal Bar */
 .quran-header {
   background-color: var(--quran-header-bg) !important;
   color: var(--quran-header-text);
-  border-bottom: 1px solid var(--quran-border);
 }
 
-.quran-header h1,
-.quran-header p,
-.quran-header span,
-.quran-header a,
-.quran-header button {
+.quran-header * {
   color: var(--quran-header-text);
 }
 
-/* Quran Text Styling */
+/* Quran Content Area */
+.quran-content {
+  background-color: var(--quran-bg);
+  color: var(--quran-text);
+  padding: 1rem;
+}
+
+/* Ornate Surah Banner - Islamic Frame */
+.quran-surah-banner {
+  background: var(--quran-teal);
+  border-radius: 0;
+  padding: 6px;
+  position: relative;
+  margin: 0 -1rem;
+  box-shadow:
+    inset 0 0 0 2px var(--quran-gold),
+    inset 0 0 0 4px var(--quran-teal),
+    inset 0 0 0 6px var(--quran-gold);
+}
+
+.quran-surah-banner::before,
+.quran-surah-banner::after {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: var(--quran-teal);
+  border: 2px solid var(--quran-gold);
+  transform: rotate(45deg);
+  z-index: 2;
+}
+
+.quran-surah-banner::before {
+  left: -20px;
+  top: 50%;
+  margin-top: -20px;
+}
+
+.quran-surah-banner::after {
+  right: -20px;
+  top: 50%;
+  margin-top: -20px;
+}
+
+.quran-surah-banner-inner {
+  background: linear-gradient(135deg, #f8f4e8 0%, #ebe5d6 50%, #f8f4e8 100%);
+  padding: 0.5rem 2rem;
+  text-align: center;
+  position: relative;
+  border: 1px solid var(--quran-gold);
+}
+
+.dark .quran-surah-banner-inner {
+  background: linear-gradient(135deg, #2a2520 0%, #352f28 50%, #2a2520 100%);
+}
+
+.quran-surah-banner-title {
+  font-family: "Amiri", "Scheherazade New", serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--quran-teal);
+  margin: 0.25rem 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.quran-surah-banner-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.65rem;
+  font-family: var(--font-arabic);
+  color: var(--quran-text);
+  opacity: 0.75;
+  padding: 0 0.5rem;
+}
+
+.quran-surah-banner-corner {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: var(--quran-teal);
+  z-index: 1;
+}
+
+.quran-surah-banner-corner.top-left {
+  top: -4px;
+  left: -4px;
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+.quran-surah-banner-corner.top-right {
+  top: -4px;
+  right: -4px;
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+
+.quran-surah-banner-corner.bottom-left {
+  bottom: -4px;
+  left: -4px;
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+}
+
+.quran-surah-banner-corner.bottom-right {
+  bottom: -4px;
+  right: -4px;
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+}
+
+/* Quran Arabic Text - Continuous Flow */
+.quran-arabic-flow {
+  font-family: "Amiri Quran", "Amiri", "Scheherazade New", serif;
+  font-size: 1.6rem;
+  line-height: 2.8;
+  text-align: justify;
+  text-align-last: center;
+  direction: rtl;
+  color: var(--quran-text);
+  word-spacing: 0.1em;
+  padding: 1rem 0;
+}
+
+/* Word Highlighting */
+.quran-word-allah {
+  color: var(--quran-pink);
+  font-weight: inherit;
+}
+
+.quran-word-special {
+  color: var(--quran-green);
+  font-weight: inherit;
+}
+
+/* Ornate Verse Number Badge - Decorative Star/Octagonal Style */
+.verse-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: 0 0.3rem;
+  vertical-align: middle;
+  direction: ltr;
+  position: relative;
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--quran-teal);
+}
+
+/* Outer decorative ring */
+.verse-badge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--quran-verse-bg);
+  border: 2px solid var(--quran-teal);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 1px var(--quran-verse-bg),
+    0 0 0 3px var(--quran-teal);
+}
+
+/* Inner decorative dot pattern simulation */
+.verse-badge::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border: 1.5px solid var(--quran-teal);
+  border-radius: 50%;
+  top: 1px;
+  opacity: 0.8;
+}
+
+.verse-badge span {
+  position: relative;
+  z-index: 2;
+}
+
+/* Larger verse numbers styling */
+.verse-badge[data-large="true"] {
+  width: 36px;
+  height: 36px;
+  font-size: 0.6rem;
+}
+
+/* Bismillah - Decorative */
+.quran-bismillah {
+  font-family: "Amiri", "Scheherazade New", serif;
+  font-size: 1.7rem;
+  line-height: 2;
+  text-align: center;
+  direction: rtl;
+  color: var(--quran-text);
+  padding: 1rem 0;
+  margin-bottom: 0;
+  letter-spacing: 0.02em;
+}
+
+.quran-bismillah .allah-name {
+  color: var(--quran-pink);
+}
+
+.quran-bismillah .rahman-name {
+  color: var(--quran-green);
+}
+
+/* Bottom Audio Bar */
+.quran-audio-bar {
+  background-color: var(--quran-header-bg);
+  color: var(--quran-header-text);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+}
+
+.quran-audio-bar button {
+  color: var(--quran-header-text);
+}
+
+.quran-page-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+  overflow-x: auto;
+  padding: 0 1rem;
+}
+
+.quran-page-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+}
+
+.quran-page-dot.active {
+  background: white;
+  width: 8px;
+  height: 8px;
+}
+
+.quran-page-number {
+  background: var(--quran-teal-light);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Legacy support */
 .quran-arabic {
   font-family: var(--font-arabic);
   font-size: 1.75rem;
@@ -285,55 +551,89 @@ body {
   color: hsl(var(--muted-foreground));
 }
 
-/* Verse Number Badge (inline with text) */
-.verse-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 2px solid #2d6a4f;
-  background-color: rgba(45, 106, 79, 0.08);
-  color: #2d6a4f;
-  font-size: 0.75rem;
-  font-weight: 700;
-  font-family: var(--font-sans);
-  margin: 0 0.3rem;
-  vertical-align: middle;
-  direction: ltr;
+/* Decorative Ornaments */
+.quran-ornament {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background: var(--quran-teal);
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
 }
 
-.dark .verse-badge {
-  border-color: #52b788;
-  color: #52b788;
-  background-color: rgba(82, 183, 136, 0.1);
+/* Swipe/Touch Gestures Area */
+.quran-swipe-area {
+  touch-action: pan-y;
+  user-select: none;
 }
 
-/* Bismillah styling */
-.quran-bismillah {
-  font-family: var(--font-arabic);
-  font-size: 1.8rem;
-  line-height: 2.5;
-  text-align: center;
-  direction: rtl;
-  color: var(--quran-text, hsl(var(--foreground)));
-  padding: 1rem 0;
+/* Verse highlight on tap */
+.verse-highlight {
+  background-color: var(--quran-verse-bg);
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  transition: background-color 0.2s ease;
 }
 
-/* Surah title banner */
-.quran-surah-banner {
-  background: linear-gradient(135deg, #2d4a3e 0%, #3d6b5e 100%);
-  color: #f5f0e1;
-  border-radius: 0.75rem;
-  padding: 1rem 1.5rem;
-  text-align: center;
-  border: 2px solid #4a7a6a;
+/* Responsive Text Sizing */
+@media (min-width: 640px) {
+  .quran-arabic-flow {
+    font-size: 1.8rem;
+    line-height: 3;
+  }
+
+  .verse-badge {
+    width: 40px;
+    height: 40px;
+    font-size: 0.8rem;
+  }
+
+  .quran-bismillah {
+    font-size: 2.2rem;
+  }
 }
 
-.dark .quran-surah-banner {
-  background: linear-gradient(135deg, #1a3029 0%, #2d4a3e 100%);
-  border-color: #3d6b5e;
+@media (min-width: 1024px) {
+  .quran-arabic-flow {
+    font-size: 2rem;
+    line-height: 3.2;
+  }
+
+  .quran-surah-banner {
+    margin: 0;
+    border-radius: 8px;
+  }
+}
+
+/* Hide scrollbar for page dots */
+.quran-page-dots {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.quran-page-dots::-webkit-scrollbar {
+  display: none;
+}
+
+/* Prevent layout shift while loading */
+.quran-arabic-flow {
+  min-height: 200px;
+}
+
+/* Smooth page transitions */
+.quran-content {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Countdown Timer Animations */
