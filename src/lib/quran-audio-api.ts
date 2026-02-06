@@ -11,13 +11,22 @@ const RECITER_ARABIC_NAMES: Record<string, string> = {
   "5": "هاني الرفاعي",
 }
 
+// Simple in-memory cache for client-side
+let recitersCache: Reciter[] | null = null
+let audioCache: Map<number, SurahAudioResponse> = new Map()
+
 /**
  * Fetch all available reciters
- * Cache for 24 hours (reciters list rarely changes)
+ * Caches result in memory for the session
  */
 export async function fetchReciters(): Promise<Reciter[]> {
+  // Return cached if available
+  if (recitersCache) {
+    return recitersCache
+  }
+
   const response = await fetch(`${QURAN_AUDIO_BASE_URL}/reciters.json`, {
-    next: { revalidate: 86400 }, // 24 hours ISR
+    cache: "force-cache",
   })
 
   if (!response.ok) {
@@ -27,27 +36,38 @@ export async function fetchReciters(): Promise<Reciter[]> {
   const data: RecitersResponse = await response.json()
 
   // Map to Reciter objects with Arabic names
-  return Object.entries(data).map(([id, name]) => ({
+  recitersCache = Object.entries(data).map(([id, name]) => ({
     id,
     name,
     nameArabic: RECITER_ARABIC_NAMES[id] || name,
   }))
+
+  return recitersCache
 }
 
 /**
  * Fetch audio URLs for a surah (all reciters)
- * Cache for 24 hours
+ * Caches result in memory for the session
  */
 export async function fetchSurahAudio(surahNumber: number): Promise<SurahAudioResponse> {
+  // Return cached if available
+  const cached = audioCache.get(surahNumber)
+  if (cached) {
+    return cached
+  }
+
   const response = await fetch(`${QURAN_AUDIO_BASE_URL}/audio/${surahNumber}.json`, {
-    next: { revalidate: 86400 }, // 24 hours ISR
+    cache: "force-cache",
   })
 
   if (!response.ok) {
     throw new Error(`Failed to fetch audio: ${response.status}`)
   }
 
-  return response.json()
+  const data = await response.json()
+  audioCache.set(surahNumber, data)
+
+  return data
 }
 
 /**

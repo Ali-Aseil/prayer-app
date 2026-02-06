@@ -68,19 +68,22 @@ export function AudioPlayerBar({
       <Button
         variant="ghost"
         size="icon"
-        className="text-white hover:bg-white/10 shrink-0"
-        onClick={onPlayPause}
+        className="h-12 w-12 rounded-full bg-white/20 text-white hover:bg-white/30 shrink-0"
+        onClick={() => {
+          console.log("[AudioBar] Play button clicked!")
+          onPlayPause()
+        }}
         disabled={isLoading || hasError}
         aria-label={isPlaying ? t("quran.pauseAudio") : t("quran.playAudio")}
       >
         {isLoading ? (
-          <Loader2 className="h-6 w-6 animate-spin" />
+          <Loader2 className="h-7 w-7 animate-spin" />
         ) : hasError ? (
-          <AlertCircle className="h-6 w-6 text-red-400" />
+          <AlertCircle className="h-7 w-7 text-red-400" />
         ) : isPlaying ? (
-          <Pause className="h-6 w-6" />
+          <Pause className="h-7 w-7" />
         ) : (
-          <Play className="h-6 w-6 fill-current" />
+          <Play className="h-7 w-7 fill-current" />
         )}
       </Button>
 
