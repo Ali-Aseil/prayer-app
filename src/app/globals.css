@@ -255,6 +255,7 @@ body {
 .quran-page {
   background-color: var(--quran-bg);
   min-height: 100vh;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 /* Quran Header - Teal Bar */
@@ -277,46 +278,24 @@ body {
 /* Ornate Surah Banner - Islamic Frame */
 .quran-surah-banner {
   background: var(--quran-teal);
-  border-radius: 0;
+  border-radius: 8px;
   padding: 6px;
   position: relative;
-  margin: 0 -1rem;
+  margin: 0;
   box-shadow:
     inset 0 0 0 2px var(--quran-gold),
     inset 0 0 0 4px var(--quran-teal),
     inset 0 0 0 6px var(--quran-gold);
-}
-
-.quran-surah-banner::before,
-.quran-surah-banner::after {
-  content: '';
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  background: var(--quran-teal);
-  border: 2px solid var(--quran-gold);
-  transform: rotate(45deg);
-  z-index: 2;
-}
-
-.quran-surah-banner::before {
-  left: -20px;
-  top: 50%;
-  margin-top: -20px;
-}
-
-.quran-surah-banner::after {
-  right: -20px;
-  top: 50%;
-  margin-top: -20px;
+  overflow: hidden;
 }
 
 .quran-surah-banner-inner {
   background: linear-gradient(135deg, #f8f4e8 0%, #ebe5d6 50%, #f8f4e8 100%);
-  padding: 0.5rem 2rem;
+  padding: 0.75rem 1.5rem;
   text-align: center;
   position: relative;
   border: 1px solid var(--quran-gold);
+  border-radius: 4px;
 }
 
 .dark .quran-surah-banner-inner {
@@ -343,36 +322,9 @@ body {
   padding: 0 0.5rem;
 }
 
+/* Corner decorations - hidden to prevent overflow */
 .quran-surah-banner-corner {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  background: var(--quran-teal);
-  z-index: 1;
-}
-
-.quran-surah-banner-corner.top-left {
-  top: -4px;
-  left: -4px;
-  clip-path: polygon(0 0, 100% 0, 0 100%);
-}
-
-.quran-surah-banner-corner.top-right {
-  top: -4px;
-  right: -4px;
-  clip-path: polygon(0 0, 100% 0, 100% 100%);
-}
-
-.quran-surah-banner-corner.bottom-left {
-  bottom: -4px;
-  left: -4px;
-  clip-path: polygon(0 0, 0 100%, 100% 100%);
-}
-
-.quran-surah-banner-corner.bottom-right {
-  bottom: -4px;
-  right: -4px;
-  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+  display: none;
 }
 
 /* Quran Arabic Text - Continuous Flow */

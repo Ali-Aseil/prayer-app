@@ -105,11 +105,12 @@ export default function SurahPage() {
   const totalPages = surahData ? Math.ceil(surahData.verses.length / versesPerPage) : 1
 
   // Touch gesture handling for swipe navigation
-  const touchStartX = useRef(0)
-  const touchEndX = useRef(0)
-  const minSwipeDistance = 50
+  const touchStartX = useRef<number | null>(null)
+  const touchEndX = useRef<number | null>(null)
+  const minSwipeDistance = 80
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchEndX.current = null // Reset end position
     touchStartX.current = e.targetTouches[0].clientX
   }, [])
 
@@ -118,22 +119,31 @@ export default function SurahPage() {
   }, [])
 
   const handleTouchEnd = useCallback(() => {
+    // Only process if we have both start and end positions
+    if (touchStartX.current === null || touchEndX.current === null) {
+      touchStartX.current = null
+      touchEndX.current = null
+      return
+    }
+
     const distance = touchStartX.current - touchEndX.current
     const isLeftSwipe = distance > minSwipeDistance
     const isRightSwipe = distance < -minSwipeDistance
 
+    // Reset touch values
+    touchStartX.current = null
+    touchEndX.current = null
+
     if (isLeftSwipe) {
-      // Swipe left = next page (RTL: previous content)
+      // Swipe left = next page (for RTL content, this goes forward)
       if (currentPage < totalPages) {
         setCurrentPage(p => p + 1)
         window.scrollTo(0, 0)
       } else if (surahNumber < 114) {
         router.push(`/quran/${surahNumber + 1}`)
       }
-    }
-
-    if (isRightSwipe) {
-      // Swipe right = previous page (RTL: next content)
+    } else if (isRightSwipe) {
+      // Swipe right = previous page (for RTL content, this goes back)
       if (currentPage > 1) {
         setCurrentPage(p => p - 1)
         window.scrollTo(0, 0)
@@ -326,11 +336,6 @@ export default function SurahPage() {
             {currentPage === 1 && (
               <div className="quran-surah-banner mb-4">
                 <div className="quran-surah-banner-inner">
-                  <div className="quran-surah-banner-corner top-left" />
-                  <div className="quran-surah-banner-corner top-right" />
-                  <div className="quran-surah-banner-corner bottom-left" />
-                  <div className="quran-surah-banner-corner bottom-right" />
-
                   <div className="quran-surah-banner-info">
                     <span>آياتها {convertToArabicNumeral(surahData.numberOfAyahs)}</span>
                     <span>{surahData.revelationType === "Meccan" ? "مكية" : "مدنية"}</span>
