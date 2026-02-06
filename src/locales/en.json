@@ -80,7 +80,15 @@
     "viewTranslation": "Translation",
     "bismillahTranslation": "In the name of Allah, the Most Gracious, the Most Merciful",
     "versesRange": "Verses {{start}}\u2013{{end}}",
-    "backToQuran": "Back to Quran"
+    "backToQuran": "Back to Quran",
+    "reciters": "Reciters",
+    "selectReciter": "Select Reciter",
+    "recitersCount": "{{count}} reciters available",
+    "nowPlaying": "Now Playing",
+    "loading": "Loading audio...",
+    "audioError": "Failed to load audio",
+    "playAudio": "Play",
+    "pauseAudio": "Pause"
   },
 
   "settings": {

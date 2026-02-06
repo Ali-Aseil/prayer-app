@@ -3,11 +3,14 @@
 import { useState, useEffect, useMemo, Fragment, useRef, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowRight, Bookmark, Search, Play, Pause, ChevronLeft, ChevronRight } from "lucide-react"
+import { ArrowRight, Bookmark, Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SURAHS } from "@/data/surahs"
 import { useTranslation } from "@/contexts/language-context"
+import { useQuranAudio } from "@/hooks/use-quran-audio"
+import { ReciterSelector, ReciterButton } from "@/components/quran/reciter-selector"
+import { AudioPlayerBar } from "@/components/quran/audio-player-bar"
 
 interface Verse {
   number: number
@@ -73,13 +76,27 @@ export default function SurahPage() {
   const router = useRouter()
   const rawSurah = params.surah as string
   const surahNumber = /^\d+$/.test(rawSurah) ? Math.min(Math.max(Number(rawSurah), 1), 114) : 1
-  const { t } = useTranslation()
+  const { t, language } = useTranslation()
 
   const [surahData, setSurahData] = useState<SurahData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isPlaying, setIsPlaying] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
+  const [isReciterModalOpen, setIsReciterModalOpen] = useState(false)
+
+  // Audio hook
+  const {
+    reciters,
+    selectedReciter,
+    setSelectedReciter,
+    isLoadingReciters,
+    playbackState,
+    currentTime,
+    duration,
+    toggle,
+    seek,
+    error: audioError,
+  } = useQuranAudio(surahNumber)
 
   const surahInfo = SURAHS.find((s) => s.number === surahNumber)
 
@@ -235,24 +252,34 @@ export default function SurahPage() {
   const surahNameDisplay = surahInfo?.name || surahData?.name || ""
   const juzNumber = 1 // Simplified - would need proper juz calculation
 
+  // Get reciter name for display
+  const reciterDisplayName = selectedReciter
+    ? (language === "ar" ? selectedReciter.nameArabic : selectedReciter.name)
+    : ""
+
   return (
     <div className="quran-page min-h-screen flex flex-col">
       {/* Header */}
       <header className="quran-header sticky top-0 z-40">
         <div className="flex h-14 items-center justify-between px-4">
-          {/* Left side - Bookmark & Search */}
-          <div className="flex items-center gap-2">
+          {/* Left side - Bookmark, Search & Reciter */}
+          <div className="flex items-center gap-1">
             <Button variant="ghost" size="icon" className="text-inherit hover:bg-white/10">
               <Bookmark className="h-5 w-5" />
             </Button>
             <Button variant="ghost" size="icon" className="text-inherit hover:bg-white/10">
               <Search className="h-5 w-5" />
             </Button>
+            <ReciterButton
+              recitersCount={reciters.length}
+              onClick={() => setIsReciterModalOpen(true)}
+              isLoading={isLoadingReciters}
+            />
           </div>
 
           {/* Center - Surah Name */}
-          <div className="flex-1 text-center">
-            <h1 className="font-semibold text-base" dir="rtl" lang="ar">
+          <div className="flex-1 text-center min-w-0">
+            <h1 className="font-semibold text-sm truncate" dir="rtl" lang="ar">
               {surahNameDisplay}، الجزء {convertToArabicNumeral(juzNumber)}
             </h1>
           </div>
@@ -376,34 +403,31 @@ export default function SurahPage() {
 
       {/* Bottom Audio Bar */}
       {surahData && !isLoading && (
-        <div className="quran-audio-bar">
-          {/* Play Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-white hover:bg-white/10"
-            onClick={() => setIsPlaying(!isPlaying)}
-          >
-            {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 fill-current" />}
-          </Button>
-
-          {/* Page Dots */}
-          <div className="quran-page-dots">
-            {Array.from({ length: Math.min(totalPages, 30) }).map((_, i) => (
-              <button
-                key={i}
-                className={`quran-page-dot ${i + 1 === currentPage ? 'active' : ''}`}
-                onClick={() => setCurrentPage(i + 1)}
-              />
-            ))}
-          </div>
-
-          {/* Page Number */}
-          <div className="quran-page-number">
-            {convertToArabicNumeral(currentPage)}
-          </div>
-        </div>
+        <AudioPlayerBar
+          playbackState={playbackState}
+          currentTime={currentTime}
+          duration={duration}
+          onPlayPause={toggle}
+          onSeek={seek}
+          reciterName={reciterDisplayName}
+          surahName={surahNameDisplay}
+          onReciterClick={() => setIsReciterModalOpen(true)}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          error={audioError}
+        />
       )}
+
+      {/* Reciter Selector Modal */}
+      <ReciterSelector
+        reciters={reciters}
+        selectedReciter={selectedReciter}
+        onSelect={setSelectedReciter}
+        isOpen={isReciterModalOpen}
+        onClose={() => setIsReciterModalOpen(false)}
+        isLoading={isLoadingReciters}
+      />
     </div>
   )
 }
