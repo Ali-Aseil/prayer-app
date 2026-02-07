@@ -440,56 +440,7 @@ body {
   color: var(--quran-green);
 }
 
-/* Bottom Audio Bar - positioned above the navigation bar */
-.quran-audio-bar {
-  background-color: var(--quran-header-bg);
-  color: var(--quran-header-text);
-  padding: 0.75rem 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  position: fixed;
-  bottom: 4rem; /* Above the 4rem (h-16) navigation bar */
-  left: 0;
-  right: 0;
-  z-index: 49;
-}
-
-.quran-audio-bar button {
-  color: var(--quran-header-text);
-}
-
-.quran-page-dots {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  flex: 1;
-  justify-content: center;
-  overflow-x: auto;
-  padding: 0 1rem;
-}
-
-.quran-page-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.4);
-  flex-shrink: 0;
-}
-
-.quran-page-dot.active {
-  background: white;
-  width: 8px;
-  height: 8px;
-}
-
-.quran-page-number {
-  background: var(--quran-teal-light);
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
+/* Audio bar styles are now inline in the component */
 
 /* Audio Progress Bar */
 .quran-audio-progress {

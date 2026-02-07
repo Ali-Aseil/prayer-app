@@ -45,6 +45,7 @@ export default function SurahPage() {
   const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [isReciterModalOpen, setIsReciterModalOpen] = useState(false)
+  const [showAudioBar, setShowAudioBar] = useState(true)
 
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
@@ -268,11 +269,6 @@ export default function SurahPage() {
                           {convertToArabicNumeral(verse.number)}
                         </span>
                       </p>
-
-                      {/* Translation */}
-                      <p className="text-sm text-gray-600 mt-2 leading-relaxed">
-                        {verse.translation}
-                      </p>
                     </div>
                   ))}
 
@@ -306,25 +302,28 @@ export default function SurahPage() {
         </div>
       )}
 
-      {/* Bottom Audio Bar */}
-      {surahData && !isLoading && (
-        <AudioPlayerBar
-          playbackState={playbackState}
-          currentTime={currentTime}
-          duration={duration}
-          onPlayPause={toggle}
-          onSeek={seek}
-          reciterName={reciterDisplayName}
-          surahName={surahNameDisplay}
-          onReciterClick={() => setIsReciterModalOpen(true)}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={(page) => {
-            setCurrentPage(page)
-            scrollToPage(page)
-          }}
-          error={audioError}
-        />
+      {/* Bottom Audio Bar - positioned above navigation */}
+      {surahData && !isLoading && showAudioBar && (
+        <div className="fixed bottom-20 left-0 right-0 z-40">
+          <AudioPlayerBar
+            playbackState={playbackState}
+            currentTime={currentTime}
+            duration={duration}
+            onPlayPause={toggle}
+            onSeek={seek}
+            reciterName={reciterDisplayName}
+            surahName={surahNameDisplay}
+            onReciterClick={() => setIsReciterModalOpen(true)}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => {
+              setCurrentPage(page)
+              scrollToPage(page)
+            }}
+            error={audioError}
+            onClose={() => setShowAudioBar(false)}
+          />
+        </div>
       )}
 
       {/* Reciter Selector Modal */}
