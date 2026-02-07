@@ -187,10 +187,16 @@ export default function SurahPage() {
       {/* Header */}
       <header className="bg-[#1b5e4b] text-white shrink-0">
         <div className="flex h-14 items-center justify-between px-4">
-          {/* Left - Reciter Button */}
+          {/* Left - Reciter Button: toggles audio bar or opens reciter selector */}
           <ReciterButton
             recitersCount={reciters.length}
-            onClick={() => setIsReciterModalOpen(true)}
+            onClick={() => {
+              if (!showAudioBar) {
+                setShowAudioBar(true)
+              } else {
+                setIsReciterModalOpen(true)
+              }
+            }}
             isLoading={isLoadingReciters}
           />
 
